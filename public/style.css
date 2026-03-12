@@ -1,0 +1,47 @@
+body{
+font-family: Arial;
+background:#0f1720;
+color:white;
+padding:20px;
+}
+
+.controls{
+margin-bottom:20px;
+}
+
+button{
+padding:8px 14px;
+margin-right:10px;
+cursor:pointer;
+}
+
+#qrBox{
+margin:20px 0;
+}
+
+#grid{
+display:grid;
+grid-template-columns:repeat(10,60px);
+gap:8px;
+}
+
+.cell{
+background:#1f2937;
+height:60px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:6px;
+}
+
+.present{
+background:#16a34a;
+}
+
+.pending{
+background:#f59e0b;
+}
+
+.rejected{
+background:#ef4444;
+}

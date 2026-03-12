@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Attendify</title>
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+</head>
+<body>
+
+<h1>Attendify QR Attendance</h1>
+
+<div class="controls">
+
+<select id="section">
+<option value="A">Section A</option>
+<option value="B">Section B</option>
+</select>
+
+<select id="subject">
+<option value="MC">MC</option>
+<option value="CHM">CHM</option>
+<option value="IWT">IWT</option>
+</select>
+
+<button id="startBtn">Start Session</button>
+<button id="endBtn">End Session</button>
+
+</div>
+
+<div id="qrBox"></div>
+
+<h2>Attendance</h2>
+
+<div id="grid"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
