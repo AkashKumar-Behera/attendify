@@ -1,143 +1,797 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendify Grid</title>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Attendify</title>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#111827">
+  <style>
+    :root {
+      --primary-color:#cacbd9a6; 
+      --background-color:  #F6FAFD;
+      --secondary-color: #B3CFE5;
+      --accent-color: #4A7FA7;
+      --text-color: #0A1931;
+      --bg: #030611;
+      --card:#040916;
+      --panel: #071225;
+      --muted: #9fb0c7;
+      --accent: #06b6d4;
+      --ok: #10b981;
+      --warn: #f59e0b;
+      --card: #EAF3FF;
+      --red: #ef4444;
+      --card-border: rgba(255, 255, 255, 0.04);
+      --radius: 12px;
+    }
 
-<style>
+    * { box-sizing: border-box }
 
-body{
-    margin:0;
-    font-family:Arial;
-    background:#020c1f;
-    color:white;
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, Arial;
+      background: linear-gradient(180deg, #030611 0%, #071127 100%);
+      color: #e6f0fb;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-height: 100%;
+      max-width: 1500px;
+      margin: 40px auto;
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.01));
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+    }
+
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px }
+    header h1 { margin: 0; font-size: 18px }
+
+    .muted { color: var(--muted); font-size: 13px }
+
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+
+    select, input, button {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: transparent;
+      color: inherit;
+    }
+
+    .btn {
+      background: var(--accent);
+      border: none;
+      color: #012;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-top: 12px }
+
+    .cell {
+      min-height: 56px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .cell .roll { font-weight: 700 }
+    .cell .meta { font-size: 11px; color: var(--muted) }
+
+    .cell.present {
+      background: linear-gradient(90deg, var(--ok), rgba(0, 255, 170, 0.22));
+      border: 1px solid rgba(16, 185, 129, 0.18);
+      color: #ffffff;
+    }
+
+    .cell.pending {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.22));
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      color: #1a1200;
+    }
+
+    .cell.rejected {
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.22));
+      border: 1px solid rgba(239, 68, 68, 0.18);
+      color: #200909;
+    }
+
+    .side .frame {
+      background: linear-gradient(180deg, #06101a, #081324);
+      padding: 14px;
+      border-radius: 12px;
+      border: 6px solid rgba(255, 255, 255, 0.02);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+    }
+
+    /* QR container: white padded box so scanners get high contrast */
+    .qr-box {
+      margin: 10px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      background: white;            /* ensure white background */
+      padding: 10px; 
+      padding-top: 5px;          /* padding around QR (helps camera detect margin) */
+      padding-bottom: 5px;            /* padding around QR (helps camera detect margin) */
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+      position: relative;          /* for overlay positioning */
+      overflow: hidden;
+    }
+
+    /* qrcodejs renders a canvas; make sure it has no transparency and correct size */
+    #qrcode canvas {
+      display: block;
+      background: white !important;
+      border-radius: 8px;
+    }
+
+    .qrTimer { font-weight: 700; margin-top: 6px }
+
+    .legend { display: flex; gap: 10px; margin-top: 8px; align-items: center }
+
+    .dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block }
+
+    .ok { background: var(--ok) }
+    .warn { background: var(--warn) }
+    .red { background: var(--red) }
+
+    .counts { display: flex; gap: 8px; margin-top: 8px }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width:980px) {
+      .wrap { grid-template-columns: 1fr; gap: 12px }
+      .grid { grid-template-columns: repeat(5, 1fr) }
+    }
+
+    /* --- Styled card cells: name centered, roll bottom-right --- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 6px;
+    }
+
+    .cell {
+      position: relative;
+      min-height: 70px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .12s;
+      padding: 4px;
+      font-size: 13px;
+    }
+
+    .cell:hover { transform: translateY(-3px); }
+
+    .cell .student-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell .roll-badge { position: absolute; right: 6px; bottom: 4px; font-weight: 700; font-size: 11px; }
+
+    .cell.present { background: linear-gradient(90deg,var(--ok),#10b98144); border: 1px solid rgba(16,185,129,0.18); color: #ffffff; }
+    .cell.pending { background: linear-gradient(90deg,var(--warn),#f59e0b44); border: 1px solid rgba(255, 255, 255, 0.18); color: white; }
+    .cell.rejected { background: linear-gradient(90deg,var(--red),#ef444444); border: 1px solid rgba(255, 255, 255, 0.18); color: white; }
+
+    .side .frame { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #qrcode { margin: 12px 0; }
+
+    select { background: var(--bg); }
+
+    /* ---------- QR cover animation styles ---------- */
+    .qr-cover {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -110%;         /* start fully below */
+      height: 110%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      pointer-events: none;
+      transform: translateY(0);
+      z-index: 6;
+    }
+    .qr-cover img {
+      width: 100%;
+      height: auto;
+      max-height: 110%;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+      opacity: 0.98;
+    }
+
+    /* keyframes slide-up */
+    @keyframes slideUpCover {
+      0% { bottom: -110%; }
+      80% { bottom: 0%; }
+      100% { bottom: 0%; }
+    }
+    .qr-cover.show {
+      animation: slideUpCover 800ms ease-out forwards;
+    }
+
+    /* expired overlay text (used as fallback when QR is replaced with plain text) */
+    .qr-expired-text {
+      position: absolute;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index: 7;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      background: rgba(0,0,0,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+    /* Suspected proxy (yellow) */
+.cell.suspected {
+  background: linear-gradient(90deg,#f59e0b,#fbbf24);
+  border: 1px solid rgba(245,158,11,0.18);
+  color: #021; /* dark text over yellow */
+  box-shadow: 0 8px 20px rgba(251,191,36,0.08);
 }
 
-.container{
-    padding:20px;
-}
-
-.topbar{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-}
-
-button{
-    padding:10px 20px;
-    border:none;
-    border-radius:8px;
-    background:#0ea5e9;
-    color:white;
-    cursor:pointer;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
-    gap:12px;
-}
-
-.card{
-    background:#071a35;
-    border-radius:10px;
-    height:70px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-    font-weight:bold;
-    border:1px solid #0c2a52;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.card:hover{
-    background:#0b2c55;
-}
-
-.present{
-    background:#0f5132;
-    border-color:#1dd1a1;
-}
-
-.pending{
-    background:#3d2c00;
-    border-color:#f59e0b;
-}
-
-</style>
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="panel">
+      <header>
+        <h1><i><strong>Attendify</strong></i></h1>
+        <div style="margin-left:auto" class="muted" id="userInfo">Not signed in</div>
+      </header>
 
-<div class="container">
+      <div class="controls">
+        <label class="muted">Section</label>
+        <select id="sectionSelect">
+          <option value="">-- Select --</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+        </select>
 
-<h2>Attendify</h2>
+        <label class="muted">Subject</label>
+        <select id="subjectSelect">
+          <option>MC</option>
+          <option>CHM</option>
+          <option>IWT</option>
+          <option>SE</option>
+          <option>EMST</option>
+          <option>WD LAB</option>
+          <option>Python LAB</option>
+          <option>CHM LAB</option>
+        </select>
 
-<div class="topbar">
-<button onclick="markAll()">Mark All Present</button>
-<button onclick="clearAll()">Clear All</button>
-</div>
-<select id="section">
-<option value="A">Section A</option>
-<option value="B">Section B</option>
-<option value="C">Section C</option>
-</select>
+        <label class="muted">Date</label>
+        <input id="dateInput" type="date" />
 
-<div class="grid" id="grid"></div>
+        <button id="startSessionBtn" class="btn">Start Session</button>
+        <button id="endSessionBtn" class="btn ghost">End</button>
+      </div>
 
-</div>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+        <div class="counts">
+          <div class="badge">Present: <span id="presentCount">0</span></div>
+          <div class="badge">Pending: <span id="pendingCount">0</span></div>
+          <div class="badge">Total: <span id="totalCount">0</span></div>
+        </div>
+      </div>
+
+      <div id="attendanceGrid" class="grid" aria-live="polite"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+        <button id="markAllPresent" class="btn ghost">Mark All Present</button>
+        <button id="clearAll" class="btn ghost">Clear All</button>
+        <button id="saveBtn" class="btn">Save Confirmed</button>
+      </div>
+    </div>
+
+    <div class="panel side">
+      <div class="frame">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">QR Preview</div>
+          <div class="muted" id="previewDate">—</div>
+        </div>
+
+        <!-- White padded box around the QR to ensure good contrast for camera scanners -->
+        <div class="qr-box" id="qrBox">
+          <div id="qrcode" aria-hidden="true"></div>
+
+          <!-- animated cover image element (change src 'qr-cover.png' to your image) -->
+          <div class="qr-cover" id="qrCover" aria-hidden="true">
+            <!-- user will replace this image as needed -->
+            <img id="qrCoverImage" src="qr-cover.png" alt="cover image (replace me)">
+          </div>
+
+          <!-- expired overlay text fallback -->
+          <div class="qr-expired-text" id="qrExpiredText" style="display:none">SESSION EXPIRED</div>
+        </div>
+
+        <div style="margin-top:8px;text-align:center">
+          <div id="qrUrl" class="muted"></div>
+          <div class="qrTimer" id="qrTimer">—</div>
+        </div>
+
+        <div class="legend">
+          <div class="dot ok"></div>
+          <div class="muted">Present</div>
+          <div class="dot warn"></div>
+          <div class="muted">Pending</div>
+          <div class="dot red"></div>
+          <div class="muted">Rejected (on timer end)</div>
+        </div>
+
+        <div style="margin-top:12px" class="muted">Allowed coords come from</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
+  // ---------- firebase config (keep your values) ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBK3VZtiG6nx4BaYGgYKV3PHGRS9yLNfYg",
+    authDomain: "attendancemodelqrbyak.firebaseapp.com",
+    databaseURL: "https://attendancemodelqrbyak-default-rtdb.firebaseio.com",
+    projectId: "attendancemodelqrbyak",
+    storageBucket: "attendancemodelqrbyak.appspot.com",
+    messagingSenderId: "545446760329",
+    appId: "1:545446760329:web:01b5610f98c2db80565b58",
+    measurementId: "G-ZMEC7XMKF7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const grid = document.getElementById("grid")
+  // ---------- UI elements ----------
+  const sectionSelect = document.getElementById('sectionSelect');
+  const subjectSelect = document.getElementById('subjectSelect');
+  const dateInput = document.getElementById('dateInput');
+  const startSessionBtn = document.getElementById('startSessionBtn');
+  const endSessionBtn = document.getElementById('endSessionBtn');
+  const attendanceGrid = document.getElementById('attendanceGrid');
+  const qrcodeEl = document.getElementById('qrcode');
+  const qrUrlEl = document.getElementById('qrUrl');
+  const qrTimerEl = document.getElementById('qrTimer');
+  const previewDate = document.getElementById('previewDate');
+  const presentCountEl = document.getElementById('presentCount');
+  const pendingCountEl = document.getElementById('pendingCount');
+  const totalCountEl = document.getElementById('totalCount');
+  const saveBtn = document.getElementById('saveBtn');
+  const markAllPresentBtn = document.getElementById('markAllPresent');
+  const clearAllBtn = document.getElementById('clearAll');
+  const qrCover = document.getElementById('qrCover');
+  const qrCoverImage = document.getElementById('qrCoverImage');
+  const qrExpiredText = document.getElementById('qrExpiredText');
 
-for(let i=1;i<=84;i++){
+  // ---------- state ----------
+  let allowedCoords = [];
+  const ALLOWED_RADIUS_METERS = 200;
 
-let card = document.createElement("div")
-card.className="card"
-card.innerText=i
+  let currentSessionId = null;   // session id persists after expire (teacher can still save manual marks)
+  let sessionActive = false;     // true while timer running / accepting student writes
+  let attendanceRefLive = null;  // live attendance listener (for active session)
+  let attendanceRefAlt = null;   // alternate path listener
+  let qrTimer = null;
+  let qrRemaining = 0;
+  let qrInstance = null;
+  let postExpireDeletionListener = null; // will hold listener that deletes incoming writes after expire
 
-card.onclick=()=>{
+  // set date default
+  dateInput.value = new Date().toISOString().slice(0, 10);
+  previewDate.textContent = dateInput.value;
 
-if(card.classList.contains("present")){
-card.classList.remove("present")
-card.classList.add("pending")
+  // helpers
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function nowDateStr() { return new Date().toISOString().slice(0, 10); }
+  function toRad(x) { return x * Math.PI / 180; }
+  function haversineDistMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+  function nearestAllowedDistance(lat, lon) {
+    if (!allowedCoords.length) return Infinity;
+    return Math.min(...allowedCoords.map(p => haversineDistMeters(lat, lon, p.lat, p.lon)));
+  }
+
+  function updateCounts() {
+    const cells = Array.from(attendanceGrid.children).filter(c => c.dataset && c.dataset.roll);
+    totalCountEl.textContent = String(cells.length || 0);
+    presentCountEl.textContent = String(cells.filter(c => c.classList.contains('present')).length);
+    // treat both pending and suspected as "pending" count (so teacher sees suspicious + out-of-range)
+    pendingCountEl.textContent = String(cells.filter(c => c.classList.contains('pending') || c.classList.contains('suspected')).length);
+  }
+
+  // load allowed coords (teacher saved)
+  db.ref('allowed_coords').on('value', snap => {
+    const val = snap.val() || {};
+    allowedCoords = Object.values(val).map(o => ({ lat: Number(o.lat), lon: Number(o.lon) })).filter(Boolean);
+  });
+
+  // load rolls for section
+  async function loadRollsForSection(letter) {
+    attendanceGrid.innerHTML = '';
+    if (!letter) { updateCounts(); return; }
+    const paths = [`Section ${letter}`, `${letter}`, `sections/${letter}`, `sections/Section ${letter}`];
+    let found = null;
+    for (const p of paths) {
+      try {
+        const snap = await db.ref(p).get();
+        if (snap.exists()) { found = snap.val(); break; }
+      } catch (e) { console.warn('read path', p, e); }
+    }
+    if (!found) { attendanceGrid.innerHTML = '<div class="muted" style="padding:12px">No rolls found for this section.</div>'; updateCounts(); return; }
+
+    const rolls = Object.keys(found).sort((a, b) => {
+      const na = Number(a), nb = Number(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+
+    rolls.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'cell';
+      div.id = 'cell-' + String(r);
+      div.dataset.roll = String(r);
+      let name = (found[r] && found[r].name) ? found[r].name : '';
+      if (name.includes(" ")) { name = name.split(" ")[0]; }
+      const nameEl = document.createElement('div'); nameEl.className = 'student-name'; nameEl.textContent = name || '';
+      const rollEl = document.createElement('div'); rollEl.className = 'roll-badge'; rollEl.textContent = r;
+      div.appendChild(nameEl); div.appendChild(rollEl);
+      attendanceGrid.appendChild(div);
+    });
+    updateCounts();
+  }
+
+  sectionSelect.addEventListener('change', () => loadRollsForSection(sectionSelect.value));
+
+  // ---------- QR helpers ----------
+  function clearQr() {
+    qrcodeEl.innerHTML = '';
+    qrUrlEl.textContent = '';
+    qrExpiredText.style.display = 'none';
+    qrCover.classList.remove('show');
+  }
+  function generateQrForUrl(url, size = 300) {
+    clearQr();
+    new QRCode(qrcodeEl, {
+      text: url,
+      width: size,
+      height: size,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    qrUrlEl.textContent = url;
+  }
+  function generateQrAsText(text, size = 300) {
+    clearQr();
+    new QRCode(qrcodeEl, {
+      text: text,
+      width: size,
+      height: size,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    qrUrlEl.textContent = '';
+  }
+
+  // ---------- session management ----------
+  function makeSessionId() { return 'sess-' + Date.now().toString(36); }
+
+  async function startSession() {
+    const section = sectionSelect.value; if (!section) { alert('Select section'); return; }
+    const subj = subjectSelect.value || 'MC';
+    const sid = makeSessionId();
+    currentSessionId = sid;
+    sessionActive = true;
+
+    const meta = { section, subject: subj, date: dateInput.value || nowDateStr(), startedAt: Date.now(), disabled: false };
+    await db.ref(`sessions/${sid}/meta`).set(meta);
+
+    // QR target
+    const studentUrl = `https://attendify-mobile.netlify.app?sessionId=${sid}`;
+    generateQrForUrl(studentUrl, 300);
+
+    // attach live listeners and timer
+    attachAttendanceListeners(sid);
+    startQrCountdown(90);
+    qrExpiredText.style.display = 'none';
+  }
+
+  async function expireSession() {
+    if (!currentSessionId) return;
+    const sid = currentSessionId;
+
+    try {
+      // 1) mark disabled
+      await db.ref(`sessions/${sid}/meta/disabled`).set(true);
+      await db.ref(`sessions/${sid}/meta/expiredAt`).set(Date.now());
+    } catch (e) { console.warn('Failed to set disabled', e); }
+
+    // STOP accepting updates and detach listeners BEFORE any DB operations that would trigger 'value' events,
+    // so the UI DOM doesn't get cleared when we later delete/modify DB.
+    sessionActive = false;
+    detachAttendanceListeners();
+
+    // Archive a snapshot for records BUT do NOT DELETE attendance/${sid} so teacher still sees the existing marks in DOM.
+    try {
+      const snap = await db.ref(`attendance/${sid}`).get();
+      if (snap.exists()) {
+        await db.ref(`sessions/${sid}/archivedAttendance`).set(snap.val());
+        // NOTE: we intentionally DO NOT remove attendance/${sid} here so teacher can save later.
+      }
+    } catch (e) { console.warn('Archive failed', e); }
+
+    // --- NEW: after expiry, mark all non-present and non-suspected as rejected (red) ---
+    Array.from(attendanceGrid.children).forEach(c => {
+      if (!c) return;
+      // keep present (green) and suspected (yellow) unchanged
+      if (c.classList.contains('present') || c.classList.contains('suspected')) return;
+      // otherwise mark rejected (red)
+      c.classList.remove('pending','present','suspected');
+      c.classList.add('rejected');
+    });
+    updateCounts();
+
+    // show expired UI and replace QR with plain text
+    generateQrAsText('SESSION EXPIRED', 300);
+    qrExpiredText.style.display = 'flex';
+    qrCover.classList.remove('show'); void qrCover.offsetWidth; qrCover.classList.add('show'); // animate cover
+
+    // set up an auto-cleaner that deletes any future child added to attendance/${sid}
+    try {
+      if (postExpireDeletionListener) { db.ref(`attendance/${sid}`).off('child_added', postExpireDeletionListener); postExpireDeletionListener = null; }
+      postExpireDeletionListener = function(snap) {
+        // remove newly added entry (best-effort)
+        try { snap.ref.remove().catch(()=>{}); } catch(e) {}
+      };
+      db.ref(`attendance/${sid}`).on('child_added', postExpireDeletionListener);
+    } catch (e) {
+      console.warn('Failed to attach delete listener', e);
+    }
+  }
+
+  // button wiring
+  startSessionBtn.addEventListener('click', startSession);
+  endSessionBtn.addEventListener('click', () => { expireSession().catch(console.error); stopQrCountdown(); });
+
+  // ---------- QR timer ----------
+  function startQrCountdown(seconds) {
+    stopQrCountdown();
+    qrRemaining = seconds; renderQrTimer();
+    qrTimer = setInterval(() => {
+      qrRemaining--; renderQrTimer();
+      if (qrRemaining <= 0) {
+        stopQrCountdown();
+        expireSession().catch(console.error);
+      }
+    }, 1000);
+  }
+  function renderQrTimer() { const mm = Math.floor(Math.max(0, qrRemaining) / 60), ss = Math.max(0, qrRemaining) % 60; qrTimerEl.textContent = `${pad(mm)}:${pad(ss)}`; }
+  function stopQrCountdown() { if (qrTimer) clearInterval(qrTimer); qrTimer = null; qrTimerEl.textContent = '—'; }
+
+  // ---------- attendance listeners (live) ----------
+  function attachAttendanceListeners(sid) {
+    detachAttendanceListeners();
+    // listen to 2 possible paths (older clients may write to different paths)
+    attendanceRefLive = db.ref(`attendance/${sid}`);
+    attendanceRefLive.on('value', snap => handleAttendanceSnapshot(snap.val() || {}));
+    attendanceRefAlt = db.ref(`sessions/${sid}/attendance`);
+    attendanceRefAlt.on('value', snap => handleAttendanceSnapshot(snap.val() || {}, true));
+  }
+  function detachAttendanceListeners() {
+    if (attendanceRefLive) { attendanceRefLive.off(); attendanceRefLive = null; }
+    if (attendanceRefAlt) { attendanceRefAlt.off(); attendanceRefAlt = null; }
+  }
+
+  // ---------- UPDATED: handle attendance snapshot to show suspectedProxy entries ----------
+  async function handleAttendanceSnapshot(dataObj = {}, isNested = false) {
+    // only accept incoming student updates if sessionActive is true
+    if (!sessionActive) {
+      // ignore incoming (but updateCounts)
+      updateCounts();
+      return;
+    }
+
+    // clear classes first (including suspected)
+    Array.from(attendanceGrid.children).forEach(c => c.classList.remove('present','pending','rejected','suspected'));
+
+    Object.keys(dataObj).forEach(roll => {
+      const entry = dataObj[roll] || {};
+      const el = document.getElementById('cell-' + roll);
+      if(!el) return;
+
+      // teacher manual overrides always win
+      if (entry.manual || entry.manualConfirmed || entry.markedBy === 'teacher') {
+        el.classList.add('present');
+        el.title = 'Teacher/Manual';
+        return;
+      }
+
+      // explicit suspected proxy flag -> show yellow (priority before geo)
+      if (entry.suspectedProxy === true || entry.note === 'suspected_proxy') {
+        el.classList.add('suspected');
+        el.title = 'Suspected proxy — teacher may verify and mark manually';
+        return;
+      }
+
+      const lat = entry.lat !== undefined ? Number(entry.lat) : (entry.coords && entry.coords.lat ? Number(entry.coords.lat) : undefined);
+      const lon = entry.lon !== undefined ? Number(entry.lon) : (entry.coords && entry.coords.lon ? Number(entry.coords.lon) : undefined);
+
+      if (lat !== undefined && lon !== undefined) {
+        const d = nearestAllowedDistance(lat, lon);
+        if (d <= ALLOWED_RADIUS_METERS) {
+          el.classList.add('present');
+          el.title = `Auto (within ${Math.round(d)}m)`;
+        } else {
+          el.classList.add('pending');
+          el.title = `Pending (out-of-campus ${Math.round(d)}m)`;
+        }
+        return;
+      }
+
+      // no coords -> pending
+      el.classList.add('pending');
+      el.title = 'Pending: no coordinates';
+    });
+
+    updateCounts();
+  }
+
+  // ---------- clicking cells (marking) ----------
+  attendanceGrid.addEventListener('click', async e => {
+    const cell = e.target.closest('.cell'); if (!cell || !cell.dataset) return;
+    const roll = cell.dataset.roll;
+
+    // if session is active => toggle live attendance under sessions/${sid}/attendance (or attendance/${sid})
+    if (sessionActive && currentSessionId) {
+      const pathA = `sessions/${currentSessionId}/attendance/${roll}`;
+      const pathB = `attendance/${currentSessionId}/${roll}`;
+      const snap = await db.ref(pathA).get();
+      if (snap.exists()) {
+        await db.ref(pathA).remove().catch(() => {});
+        await db.ref(pathB).remove().catch(() => {});
+        cell.classList.remove('present','pending','rejected','suspected');
+      } else {
+        await db.ref(pathA).set({ manual: true, ts: Date.now(), markedBy: 'teacher' }).catch(() => {});
+        cell.classList.remove('pending','rejected','suspected'); cell.classList.add('present');
+      }
+      updateCounts(); return;
+    }
+
+    // If session is NOT active but there is a currentSessionId (expired session),
+    // allow teacher to manually toggle present <-> absent via sessions/${sid}/manual/{roll}
+    if (!sessionActive && currentSessionId) {
+      const manualRef = db.ref(`sessions/${currentSessionId}/manual/${roll}`);
+      // toggle based on current DOM class rather than DB read (faster and reliable)
+      if (cell.classList.contains('present')) {
+        // currently present -> make absent (red)
+        await manualRef.set({ status: 'absent', ts: Date.now(), markedBy: 'teacher' }).catch(()=>{});
+        cell.classList.remove('present','suspected'); cell.classList.add('rejected');
+      } else {
+        // currently not present -> mark present (green) (this also overrides suspected)
+        await manualRef.set({ status: 'present', ts: Date.now(), markedBy: 'teacher' }).catch(()=>{});
+        cell.classList.remove('pending','rejected','suspected'); cell.classList.add('present');
+      }
+      updateCounts(); return;
+    }
+
+    // fallback: no session id at all
+    alert('No session available. Start a session or select a session to mark manually.');
+  });
+
+  // ---------- save button ----------
+  saveBtn.addEventListener('click', async () => {
+    // allow saving even if session expired as long as we have currentSessionId (teacher can save manual marks).
+    if (!currentSessionId) { alert('Start a session first'); return; }
+    const section = sectionSelect.value; if (!section) { alert('Select section before saving'); return; }
+    const subject = subjectSelect.value || 'MC';
+    const dateStr = dateInput.value || nowDateStr();
+
+    // final decision: treat cells with class 'present' as confirmed present (teacher-chosen or auto)
+    const cells = Array.from(attendanceGrid.querySelectorAll('.cell'));
+    const presentRolls = cells.filter(c => c.classList.contains('present')).map(c => c.dataset.roll);
+
+    if (!presentRolls.length) { alert('No present rolls to save'); return; }
+
+    // run updates for each present roll (transaction safe)
+    const promises = presentRolls.map(async roll => {
+      // increment subject counter (example path: Section A / roll / subject / subjectName)
+      const subjPath = `Section ${section}/${roll}/subject/${subject}`;
+      try {
+        // use transaction to increment safely
+        await db.ref(subjPath).transaction(curr => (Number(curr) || 0) + 1);
+        // mark claim
+        await db.ref(`session_claims/dates/${dateStr}/${roll}`).set(true);
+        // store saved claim under sessions (metadata)
+        await db.ref(`sessions/${currentSessionId}/saved/${roll}`).set({ savedAt: Date.now(), by: 'teacher' });
+      } catch (err) {
+        console.error('save err', roll, err);
+      }
+    });
+
+    await Promise.all(promises);
+    alert(`Saved ${presentRolls.length} rolls.`);
+  });
+
+  // mark all / clear all
+  markAllPresentBtn.addEventListener('click', () => {
+    Array.from(attendanceGrid.children).forEach(c => { if (c.dataset && c.dataset.roll) { c.classList.remove('pending','rejected','suspected'); c.classList.add('present'); } });
+    updateCounts();
+  });
+  clearAllBtn.addEventListener('click', () => {
+    Array.from(attendanceGrid.children).forEach(c => { if (c.dataset && c.dataset.roll) c.classList.remove('present','pending','rejected','suspected'); });
+    if (sessionActive && currentSessionId) {
+      // remove live attendance nodes (best-effort)
+      db.ref(`attendance/${currentSessionId}`).remove().catch(()=>{});
+      db.ref(`sessions/${currentSessionId}/attendance`).remove().catch(()=>{});
+    }
+    updateCounts();
+  });
+
+  // cleanup before unload
+  window.addEventListener('beforeunload', () => {
+    detachAttendanceListeners();
+    if (currentSessionId && postExpireDeletionListener) { db.ref(`attendance/${currentSessionId}`).off('child_added', postExpireDeletionListener); }
+    db.ref('allowed_coords').off();
+  });
+
+  // initial load
+  (async () => { sectionSelect.value = 'A'; await loadRollsForSection('A'); })();
+  
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+  .then(() => console.log("Service Worker Registered"));
 }
-
-else if(card.classList.contains("pending")){
-card.classList.remove("pending")
-}
-
-else{
-card.classList.add("present")
-}
-
-}
-
-grid.appendChild(card)
-
-}
-
-function markAll(){
-
-document.querySelectorAll(".card").forEach(c=>{
-c.classList.add("present")
-})
-
-}
-
-function clearAll(){
-
-document.querySelectorAll(".card").forEach(c=>{
-c.classList.remove("present","pending")
-})
-
-}
-
 </script>
 
 </body>
