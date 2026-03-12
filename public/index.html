@@ -1,48 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Attendify</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendify Grid</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#111827">
+<style>
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:#020c1f;
+    color:white;
+}
+
+.container{
+    padding:20px;
+}
+
+.topbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#0ea5e9;
+    color:white;
+    cursor:pointer;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+    gap:12px;
+}
+
+.card{
+    background:#071a35;
+    border-radius:10px;
+    height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:bold;
+    border:1px solid #0c2a52;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.card:hover{
+    background:#0b2c55;
+}
+
+.present{
+    background:#0f5132;
+    border-color:#1dd1a1;
+}
+
+.pending{
+    background:#3d2c00;
+    border-color:#f59e0b;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>Attendify QR Attendance</h1>
+<div class="container">
 
-<div class="controls">
+<h2>Attendify</h2>
 
-<select id="section">
-<option value="A">Section A</option>
-<option value="B">Section B</option>
-</select>
+<div class="topbar">
+<button onclick="markAll()">Mark All Present</button>
+<button onclick="clearAll()">Clear All</button>
+</div>
 
-<select id="subject">
-<option value="MC">MC</option>
-<option value="CHM">CHM</option>
-<option value="IWT">IWT</option>
-</select>
-
-<button id="startBtn">Start Session</button>
-<button id="endBtn">End Session</button>
+<div class="grid" id="grid"></div>
 
 </div>
 
-<div id="qrBox"></div>
-
-<h2>Attendance</h2>
-
-<div id="grid"></div>
-
-<script src="app.js"></script>
 <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
-  .then(() => console.log("Service Worker Registered"));
+
+const grid = document.getElementById("grid")
+
+for(let i=1;i<=84;i++){
+
+let card = document.createElement("div")
+card.className="card"
+card.innerText=i
+
+card.onclick=()=>{
+
+if(card.classList.contains("present")){
+card.classList.remove("present")
+card.classList.add("pending")
 }
+
+else if(card.classList.contains("pending")){
+card.classList.remove("pending")
+}
+
+else{
+card.classList.add("present")
+}
+
+}
+
+grid.appendChild(card)
+
+}
+
+function markAll(){
+
+document.querySelectorAll(".card").forEach(c=>{
+c.classList.add("present")
+})
+
+}
+
+function clearAll(){
+
+document.querySelectorAll(".card").forEach(c=>{
+c.classList.remove("present","pending")
+})
+
+}
+
 </script>
+
 </body>
 </html>
