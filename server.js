@@ -2,11 +2,15 @@ require("dotenv").config();
 
 const express = require("express");
 const admin = require("firebase-admin");
+require("dotenv").config();
 
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN);
+
+// private key fix
+serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 const app = express();
 
 // .env se firebase admin load
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -28,6 +32,10 @@ app.get("/students/:sec", async (req, res) => {
 
     res.json(data);
 
+});
+
+app.get("/mobile", (req, res) => {
+    res.sendFile(__dirname + "/public/mobile.html");
 });
 
 app.listen(3000, () => console.log("Server running"));

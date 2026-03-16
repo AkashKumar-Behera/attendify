@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendify — Leaderboard</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #111318;
+  color: white;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════ NAVBAR ═══════════════ */
+.navbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: nowrap;
+  margin-bottom: 48px;
+}
+
+.logo {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #6ee7c8;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.nav-center {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  background: #2a2c32;
+  padding: 10px;
+  border-radius: 40px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  border: .5px solid rgb(139,138,138);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  z-index: 2;
+  border-radius: 30px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+  fill: white;
+}
+
+.nav-highlight {
+  position: absolute;
+  height: 100%;
+  background: #3a3f47;
+  border-radius: 35px;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.nav-item.active {
+  color: #6ee7c8;
+}
+.nav-item.active svg { fill: #6ee7c8; }
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 50px;
+  height: 50px;
+  background: #2a2c32;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: .5px solid #3a3f47;
+  transition: border-color 0.2s;
+}
+
+.icon-btn svg { width: 18px; height: 18px; fill: white; }
+.icon-btn:hover { border-color: red; }
+
+.profile-upload { position: relative; }
+.profile-upload img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.profile-upload:hover img { border-color: white; }
+.profile-upload input { display: none; }
+
+/* ═══════════════ PAGE HEADER ═══════════════ */
+.page-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 52px;
+}
+
+.page-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: white;
+}
+
+.page-header h1 span {
+  color: #6ee7c8;
+}
+
+.page-header p {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.45;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════ PODIUM ═══════════════ */
+.podium-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 48px;
+  margin-bottom: 60px;
+}
+
+.podium-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: riseUp 0.7s cubic-bezier(.22,1,.36,1) both;
+}
+
+.podium-card:nth-child(1) { animation-delay: 0.15s; }
+.podium-card:nth-child(2) { animation-delay: 0s; }
+.podium-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.podium-avatar-wrap {
+  position: relative;
+}
+
+.podium-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 3px solid #2a2c32;
+}
+
+.podium-rank-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  border: 2px solid #111318;
+}
+
+.podium-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.podium-pct {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+}
+
+.podium-block {
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 1st place */
+.podium-card.first .podium-avatar  { width: 90px; height: 90px; border-color: #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.35); }
+.podium-card.first .podium-rank-badge { background: #FFD700; color: #111; }
+.podium-card.first .podium-pct    { color: #FFD700; }
+.podium-card.first .podium-block  { height: 110px; background: linear-gradient(180deg, #2a2416 0%, #1a1c22 100%); border: 1px solid rgba(255,215,0,0.25); width: 140px; }
+
+/* 2nd place */
+.podium-card.second .podium-avatar  { width: 74px; height: 74px; border-color: #C0C0C0; box-shadow: 0 0 16px rgba(192,192,192,0.25); }
+.podium-card.second .podium-rank-badge { background: #C0C0C0; color: #111; }
+.podium-card.second .podium-pct    { color: #C0C0C0; }
+.podium-card.second .podium-block  { height: 80px; background: linear-gradient(180deg, #1e2026 0%, #1a1c22 100%); border: 1px solid rgba(192,192,192,0.2); width: 120px; }
+
+/* 3rd place */
+.podium-card.third .podium-avatar  { width: 66px; height: 66px; border-color: #CD7F32; box-shadow: 0 0 14px rgba(205,127,50,0.25); }
+.podium-card.third .podium-rank-badge { background: #CD7F32; color: #111; }
+.podium-card.third .podium-pct    { color: #CD7F32; }
+.podium-card.third .podium-block  { height: 60px; background: linear-gradient(180deg, #1e1a14 0%, #1a1c22 100%); border: 1px solid rgba(205,127,50,0.2); width: 110px; }
+
+/* ═══════════════ LIST ═══════════════ */
+.list-section {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.list-header {
+  display: grid;
+  grid-template-columns: 52px 1fr 120px 100px;
+  padding: 0 20px 10px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.35;
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 120px 100px;
+  align-items: center;
+  background: #1a1c22;
+  border: 1px solid #2a2c32;
+  border-radius: 14px;
+  padding: 18px 22px;
+  transition: border-color 0.2s, transform 0.15s;
+  cursor: default;
+  animation: fadeSlide 0.5s ease both;
+}
+
+.list-row:hover {
+  border-color: #6ee7c8;
+  transform: translateX(4px);
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* staggered delay for rows 4-15 */
+.list-row:nth-child(1)  { animation-delay: 0.05s; }
+.list-row:nth-child(2)  { animation-delay: 0.10s; }
+.list-row:nth-child(3)  { animation-delay: 0.15s; }
+.list-row:nth-child(4)  { animation-delay: 0.20s; }
+.list-row:nth-child(5)  { animation-delay: 0.25s; }
+.list-row:nth-child(6)  { animation-delay: 0.30s; }
+.list-row:nth-child(7)  { animation-delay: 0.35s; }
+.list-row:nth-child(8)  { animation-delay: 0.40s; }
+.list-row:nth-child(9)  { animation-delay: 0.45s; }
+.list-row:nth-child(10) { animation-delay: 0.50s; }
+.list-row:nth-child(11) { animation-delay: 0.55s; }
+.list-row:nth-child(12) { animation-delay: 0.60s; }
+
+.rank-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  opacity: 0.4;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.student-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #2a2c32;
+}
+
+.student-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.student-roll {
+  font-size: 11px;
+  opacity: 0.4;
+  margin-top: 2px;
+}
+
+/* attendance bar */
+.bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #2a2c32;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(.22,1,.36,1);
+}
+
+.pct-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  min-width: 42px;
+}
+
+/* ─ colour bands ─ */
+.band-high   { background: linear-gradient(90deg, #0d9488, #6ee7c8); }
+.band-mid    { background: linear-gradient(90deg, #3b82f6, #7dd3fc); }
+.band-low    { background: linear-gradient(90deg, #f97316, #fbbf24); }
+.band-danger { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+.pct-high   { color: #6ee7c8; }
+.pct-mid    { color: #7dd3fc; }
+.pct-low    { color: #fbbf24; }
+.pct-danger { color: #f97316; }
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+
+/* Tablet / large phone */
+@media (max-width: 700px) {
+
+  body { padding: 16px; }
+
+  /* navbar */
+  .logo { font-size: 22px; }
+  .navbar { flex-wrap: wrap; gap: 12px; }
+  .logo      { order: 1; }
+  .nav-icons { order: 2; margin-left: auto; }
+  .nav-center {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    padding: 8px;
+    gap: 4px;
+  }
+  .nav-item {
+    padding: 8px 10px;
+    font-size: 12px;
+    gap: 5px;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-item svg { width: 16px; height: 16px; }
+  .icon-btn, .profile-upload img { width: 42px; height: 42px; }
+
+  /* page header */
+  .page-header { margin-bottom: 36px; }
+
+  /* podium — stack tighter, reduce block widths */
+  .podium-section { gap: 24px; margin-bottom: 44px; }
+
+  .podium-card.first  .podium-avatar { width: 72px; height: 72px; }
+  .podium-card.second .podium-avatar { width: 60px; height: 60px; }
+  .podium-card.third  .podium-avatar { width: 54px; height: 54px; }
+
+  .podium-card.first  .podium-block { width: 110px; height: 90px; }
+  .podium-card.second .podium-block { width: 95px;  height: 65px; }
+  .podium-card.third  .podium-block { width: 85px;  height: 50px; }
+
+  .podium-card.first  .podium-pct { font-size: 18px; }
+  .podium-card.second .podium-pct,
+  .podium-card.third  .podium-pct { font-size: 16px; }
+
+  .podium-name { font-size: 12px; }
+
+  /* list — hide bar column, keep rank + name + % */
+  .list-section { padding: 0; }
+  .list-header  { grid-template-columns: 36px 1fr 60px; padding: 0 16px 10px; }
+  .list-row     { grid-template-columns: 36px 1fr 60px; padding: 14px 16px; margin: 10px; }
+  .list-header .col-classes,
+  .list-row    .col-classes { display: none; }
+
+  .student-name { font-size: 13px; }
+  .student-roll { font-size: 10px; }
+  .rank-num     { font-size: 13px; }
+  .pct-label    { font-size: 13px; min-width: 36px; }
+}
+
+/* iPhone 14 Pro Max — 430px wide */
+@media (max-width: 430px) {
+
+  body { padding: 12px; }
+
+  .logo { font-size: 20px; }
+
+  .nav-center { padding: 6px; gap: 2px; }
+  .nav-item   { padding: 7px 8px; font-size: 11px; }
+
+  /* podium — tighter but still visually clear */
+  .podium-section { gap: 16px; }
+
+  .podium-card.first  .podium-avatar { width: 64px; height: 64px; }
+  .podium-card.second .podium-avatar { width: 52px; height: 52px; }
+  .podium-card.third  .podium-avatar { width: 46px; height: 46px; }
+
+  .podium-card.first  .podium-block { width: 96px;  height: 80px; }
+  .podium-card.second .podium-block { width: 82px;  height: 58px; }
+  .podium-card.third  .podium-block { width: 72px;  height: 44px; }
+
+  .podium-rank-badge { width: 22px; height: 22px; font-size: 10px; }
+
+  /* list rows */
+  .list-row  { padding: 13px 14px; border-radius: 12px; }
+  .list-section { gap: 12px; }
+
+  .student-avatar { width: 34px; height: 34px; }
+  .student-info   { gap: 10px; }
+}
+
+/* Very small — hide nav text, icons only */
+@media (max-width: 400px) {
+  .nav-item span { display: none; }
+  .nav-item      { padding: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<div class="navbar">
+  <div class="logo">Attendify</div>
+
+  <div class="nav-center">
+    <div class="nav-highlight" id="highlight"></div>
+
+    <div class="nav-item" onclick="location.href='interface.html'">
+      <svg viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg>
+      <span>Syllabus</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M7 21h4V10H7v11zm6 0h4V3h-4v18zM1 21h4V14H1v7z"/></svg>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <div class="nav-icons">
+    <div class="icon-btn">
+      <svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 00-12 0v5L4 18v1h16v-1l-2-2z"/></svg>
+    </div>
+    <label class="profile-upload">
+      <input type="file" id="profileInput" accept="image/*">
+      <img src="https://mediaproxy.tvtropes.org/width/1200/https://static.tvtropes.org/pmwiki/pub/images/snoop_dogg.png" id="profileImage">
+    </label>
+  </div>
+</div>
+
+<!-- ══════════ PAGE HEADER ══════════ -->
+<div class="page-header">
+  <h1>Attendance <span>Leaderboard</span></h1>
+  <p>Semester · June – November 2024 &nbsp;·&nbsp; Section B</p>
+</div>
+
+<!-- ══════════ PODIUM (Top 3) ══════════ -->
+<div class="podium-section">
+
+  <!-- 2nd -->
+  <div class="podium-card second">
+    <div class="podium-avatar-wrap">
+      <img class="podium-avatar" src="https://i.pravatar.cc/150?img=47" alt="Priya">
+      <div class="podium-rank-badge">2</div>
+    </div>
+    <div class="podium-name">Priya Mohanty</div>
+    <div class="podium-pct">96%</div>
+    <div class="podium-block"></div>
+  </div>
+
+  <!-- 1st -->
+  <div class="podium-card first">
+    <div class="podium-avatar-wrap">
+      <img class="podium-avatar" src="https://i.pravatar.cc/150?img=12" alt="Arjun">
+      <div class="podium-rank-badge">1</div>
+    </div>
+    <div class="podium-name">Arjun Pattnaik</div>
+    <div class="podium-pct">99%</div>
+    <div class="podium-block"></div>
+  </div>
+
+  <!-- 3rd -->
+  <div class="podium-card third">
+    <div class="podium-avatar-wrap">
+      <img class="podium-avatar" src="https://i.pravatar.cc/150?img=32" alt="Sneha">
+      <div class="podium-rank-badge">3</div>
+    </div>
+    <div class="podium-name">Sneha Rath</div>
+    <div class="podium-pct">94%</div>
+    <div class="podium-block"></div>
+  </div>
+
+</div>
+
+<!-- ══════════ FULL LIST ══════════ -->
+<div class="list-section">
+
+  <div class="list-header">
+    <div>#</div>
+    <div>Student</div>
+    <div class="col-classes">Attendance</div>
+    <div style="text-align:right">%</div>
+  </div>
+
+  <!-- rows injected by JS -->
+  <div id="leaderList"></div>
+
+</div>
+
+<script>
+/* ── Navbar highlight (same logic as attendify.html) ── */
+const navItems  = document.querySelectorAll('.nav-item');
+const highlight = document.getElementById('highlight');
+
+function moveHighlight(el){
+  highlight.style.width = el.offsetWidth + 'px';
+  highlight.style.left  = el.offsetLeft  + 'px';
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    navItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    moveHighlight(item);
+  });
+});
+
+window.addEventListener('load',   () => { const a = document.querySelector('.nav-item.active'); if(a) moveHighlight(a); });
+window.addEventListener('resize', () => { const a = document.querySelector('.nav-item.active'); if(a) moveHighlight(a); });
+
+/* ── Profile image swap ── */
+document.getElementById('profileInput').addEventListener('change', function(){
+  const file = this.files[0];
+  if(file){
+    const r = new FileReader();
+    r.onload = e => document.getElementById('profileImage').src = e.target.result;
+    r.readAsDataURL(file);
+  }
+});
+
+/* ── Student data (sorted highest → lowest) ── */
+const students = [
+  { name:'Arjun Pattnaik',   roll:'21CS001', pct:99, classes:'118/119', img:'https://i.pravatar.cc/150?img=12' },
+  { name:'Priya Mohanty',    roll:'21CS008', pct:96, classes:'115/119', img:'https://i.pravatar.cc/150?img=47' },
+  { name:'Sneha Rath',       roll:'21CS015', pct:94, classes:'112/119', img:'https://i.pravatar.cc/150?img=32' },
+  { name:'Rohit Sahoo',      roll:'21CS003', pct:91, classes:'108/119', img:'https://i.pravatar.cc/150?img=11' },
+  { name:'Ananya Das',       roll:'21CS022', pct:89, classes:'106/119', img:'https://i.pravatar.cc/150?img=44' },
+  { name:'Vikram Nayak',     roll:'21CS017', pct:86, classes:'102/119', img:'https://i.pravatar.cc/150?img=15' },
+  { name:'Deepika Panda',    roll:'21CS031', pct:83, classes:'99/119',  img:'https://i.pravatar.cc/150?img=56' },
+  { name:'Suraj Behera',     roll:'21CS009', pct:80, classes:'95/119',  img:'https://i.pravatar.cc/150?img=18' },
+  { name:'Kritika Mishra',   roll:'21CS041', pct:76, classes:'90/119',  img:'https://i.pravatar.cc/150?img=49' },
+  { name:'Aman Tripathy',    roll:'21CS025', pct:72, classes:'86/119',  img:'https://i.pravatar.cc/150?img=21' },
+  { name:'Pooja Lenka',      roll:'21CS038', pct:68, classes:'81/119',  img:'https://i.pravatar.cc/150?img=60' },
+  { name:'Nikhil Pradhan',   roll:'21CS012', pct:61, classes:'73/119',  img:'https://i.pravatar.cc/150?img=33' },
+];
+
+function band(pct){
+  if(pct >= 90) return ['band-high',  'pct-high'];
+  if(pct >= 80) return ['band-mid',   'pct-mid'];
+  if(pct >= 70) return ['band-low',   'pct-low'];
+  return              ['band-danger', 'pct-danger'];
+}
+
+const list = document.getElementById('leaderList');
+
+/* skip top 3 already shown in podium — start from rank 4 */
+students.slice(3).forEach((s, i) => {
+  const rank = i + 4;
+  const [barClass, pctClass] = band(s.pct);
+
+  const row = document.createElement('div');
+  row.className = 'list-row';
+  row.innerHTML = `
+    <div class="rank-num">${rank}</div>
+    <div class="student-info">
+      <img class="student-avatar" src="${s.img}" alt="${s.name}">
+      <div>
+        <div class="student-name">${s.name}</div>
+        <div class="student-roll">${s.roll}</div>
+      </div>
+    </div>
+    <div class="bar-wrap col-classes">
+      <div class="bar-bg">
+        <div class="bar-fill ${barClass}" style="width:0%" data-target="${s.pct}"></div>
+      </div>
+    </div>
+    <div class="pct-label ${pctClass}">${s.pct}%</div>
+  `;
+  list.appendChild(row);
+});
+
+/* animate bars after paint */
+requestAnimationFrame(() => {
+  document.querySelectorAll('.bar-fill').forEach(bar => {
+    bar.style.width = bar.dataset.target + '%';
+  });
+});
+</script>
+</body>
+</html>
