@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Attendify</title>
+<link rel="stylesheet" href="Ui.css">
+<script src="app.js" defer></script>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<div class="logo">Attendify</div>
+
+<div class="nav-center">
+
+<div class="nav-highlight" id="highlight"></div>
+
+<div class="nav-item active">
+<!-- HOME SVG -->
+<svg viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+<span>Home</span>
+</div>
+
+<div class="nav-item">
+<!-- SYLLABUS -->
+<svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg>
+<span>Syllabus</span>
+</div>
+
+<div class="nav-item">
+<!-- LEADERBOARD -->
+<svg viewBox="0 0 24 24"><path d="M7 21h4V10H7v11zm6 0h4V3h-4v18zM1 21h4V14H1v7z"/></svg>
+<span">Leaderboard</span>
+</div>
+
+<div class="nav-item">
+<!-- PROFILE -->
+<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
+<span>Profile</span>
+</div>
+
+</div>
+
+<div class="nav-icons">
+
+<!-- BELL -->
+<div class="icon-btn">
+<svg viewBox="0 0 24 24">
+<path d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 00-12 0v5L4 18v1h16v-1l-2-2z"/>
+</svg>
+</div>
+
+<!-- PROFILE IMAGE -->
+<label class="profile-upload">
+<input type="file" id="profileInput">
+<img src="https://mediaproxy.tvtropes.org/width/1200/https://static.tvtropes.org/pmwiki/pub/images/snoop_dogg.png" id="profileImage">
+</label>
+
+</div>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div class="dashboard">
+
+<div>
+
+<div class="card">
+
+<div class="tabs">
+<div class="tab active">Today</div>
+<div class="tab">Weekly</div>
+<div class="tab">Month</div>
+</div>
+
+<div class="heatmap" id="heatmap"></div>
+
+</div>
+
+<!-- TIMETABLE -->
+
+<div class="card timetable">
+
+<div class="week">
+<div class="day">Monday</div>
+<div class="day">Tuesday</div>
+<div class="day">Wednesday</div>
+<div class="day">Thursday</div>
+<div class="day">Friday</div>
+<div class="day">Saturday</div>
+</div>
+
+<div class="schedule-row">
+<div class="time">09:00</div>
+<div class="subject">Data Structures</div>
+<div class="room">Sambhu Prasad</div>
+</div>
+
+<div class="schedule-row">
+<div class="time">10:00</div>
+<div class="subject">Web Development Lab</div>
+<div class="room">Ipsita Ankita Hota</div>
+</div>
+
+<div class="schedule-row">
+<div class="time">12:00</div>
+<div class="subject">Operating Systems</div>
+<div class="room">Jagdish Mishra</div>
+</div>
+<div class="schedule-row">
+<div class="time">14:00</div>
+<div class="subject">Cloud Computing</div>
+<div class="room">Amardeep Das</div>
+</div>
+<div class="schedule-row">
+<div class="time">15:00</div>
+<div class="subject">Python</div>
+<div class="room">Kshyama</div>
+</div>
+<div class="schedule-row">
+<div class="time">16:00</div>
+<div class="subject">IOT Lab</div>
+<div class="room">Ipsita Ankita Hota</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="chart-card">
+
+<div class="pie">
+<div class="pie-inner">
+78% Present<br>
+21% Absent<br>
+1% Late
+</div>
+</div>
+
+<div class="black-box"></div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
