@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendify - Admin Panel</title>
+<style>
+/* Keeping original dark theme colors */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0b0f19; font-family: 'Inter', Arial, sans-serif; color: white; display: flex; height: 100vh; overflow: hidden; }
+
+/* SLIM SIDEBAR */
+.sidebar { width: 90px; background: #141a2e; border-right: 1px solid #2c355c; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 40px; }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 11px; cursor: pointer; gap: 8px; transition: 0.3s; }
+.nav-item:hover { color: white; }
+.nav-item.active { color: #00bcd4; }
+.nav-icon { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* MAIN CONTENT */
+.main-layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* TOP HEADER */
+.top-header { height: 80px; background: #141a2e; border-bottom: 1px solid #2c355c; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+.logo-area { display: flex; align-items: center; gap: 15px; font-size: 20px; font-weight: bold; color: white; }
+.logo-icon { width: 28px; height: 28px; fill: #00bcd4; }
+.header-actions { display: flex; align-items: center; gap: 20px; color: #888; }
+.action-icon { width: 24px; height: 24px; cursor: pointer; transition: 0.3s; }
+.action-icon:hover { color: white; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: #1b2138; border: 2px solid #2c355c; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer;}
+
+/* CONTENT AREA */
+.content-area { flex: 1; padding: 40px; overflow-y: auto; }
+.dashboard-card { background: #141a2e; border-radius: 12px; border: 1px solid #2c355c; padding: 30px; display: flex; flex-direction: column; height: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+
+/* CONTENT HEADER */
+.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;}
+.content-title { font-size: 22px; font-weight: bold; }
+.controls { display: flex; align-items: center; gap: 15px; }
+
+/* INPUTS */
+select, input.search-box { background: #0b0f19; color: white; border: 1px solid #2c355c; padding: 10px 15px; border-radius: 6px; font-size: 14px; outline: none; transition: 0.3s;}
+select:active, select:focus, input.search-box:focus { border-color: #00bcd4; }
+.search-container { position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 12px; width: 16px; height: 16px; color: #888; }
+input.search-box { padding-left: 36px; min-width: 250px;}
+
+.btn-primary { background: #00bcd4; color: black; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: 0.3s;}
+.btn-primary:hover { background: #00acc1; }
+
+/* TABLE STYLES (CARD ROWS) */
+.table-wrapper { flex: 1; overflow-y: auto; padding-right: 10px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+th { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; text-align: left; padding: 0 20px 10px 20px; border-bottom: 1px solid #2c355c; }
+
+/* Individual Row styling to look like a padded card */
+tbody tr { background: #0b0f19; box-shadow: inset 0 0 0 1px #2c355c; transition: 0.2s;}
+tbody tr:hover { box-shadow: inset 0 0 0 1px #00bcd4; background: #1b2138; }
+td { padding: 15px 20px; font-size: 14px; vertical-align: middle; }
+/* Border radius for first and last cells to make row look rounded */
+td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+/* Row Elements */
+.user-info { display: flex; align-items: center; gap: 15px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1b2138; border: 1px solid #2c355c; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #00bcd4; flex-shrink: 0;}
+.user-name { font-weight: bold; }
+
+.status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block;}
+.status-present { background: rgba(0, 200, 83, 0.15); color: #00c853; border: 1px solid rgba(0, 200, 83, 0.3);}
+.status-absent { background: rgba(255, 23, 68, 0.15); color: #ff1744; border: 1px solid rgba(255, 23, 68, 0.3);}
+.status-proxy { background: rgba(255, 167, 38, 0.15); color: #ffa726; border: 1px solid rgba(255, 167, 38, 0.3); }
+
+.detail-btn { background: transparent; color: #888; border: 1px solid #2c355c; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 12px; font-weight: bold;}
+.detail-btn:hover { background: #1b2138; color: white; border-color: #00bcd4; }
+
+/* Pagination */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2c355c; color: #888; font-size: 13px;}
+.page-btn { background: #0b0f19; border: 1px solid #2c355c; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; color: white;}
+.page-btn:hover { border-color: #00bcd4; color: #00bcd4;}
+
+.empty-state { text-align: center; padding: 60px 20px; color: #666; font-size: 14px;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <a href="dashboard.html" class="nav-item" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+    </a>
+    <a href="admin.html" class="nav-item active" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Students
+    </a>
+    <a href="timetable.html" class="nav-item" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Timetable
+    </a>
+    <a href="#" class="nav-item" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        Attendance
+    </a>
+</div>
+
+<div class="main-layout">
+    <div class="top-header">
+        <div class="logo-area">
+            <svg class="logo-icon" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+            Attendify
+        </div>
+        <div class="header-actions">
+            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div class="avatar">A</div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="dashboard-card">
+            <div class="content-header">
+                <div class="content-title">Students Details</div>
+                <div class="controls">
+                    <select id="sessionDropdown">
+                        <option value="">Loading Sessions...</option>
+                    </select>
+
+                    <div class="search-container">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="searchInput" class="search-box" placeholder="Search your student">
+                    </div>
+
+                    <button class="btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Student
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Class details</th>
+                            <th>Time Marked</th>
+                            <th>Attendance</th>
+                            <th>Device Verification</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="6" class="empty-state">Please select a session from the dropdown above.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <div class="page-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></div>
+                <span>10 of 20</span>
+                <div class="page-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

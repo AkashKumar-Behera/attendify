@@ -9,6 +9,11 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN);
 // private key fix
 serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 const app = express();
+app.use(express.static("public"));
+
+app.get("/admin", (req, res) => {
+    res.redirect("/Admin/dashboard.html");
+});
 
 // .env se firebase admin load
 
